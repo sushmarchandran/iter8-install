@@ -1,0 +1,32 @@
+name: iter8 installation
+
+on: ["push", "pull_request"]
+
+jobs:
+  install:
+    name: install iter8
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - uses: engineerd/setup-kind@v0.5.0
+
+    - name: test iter8 installation
+      run: |
+      # Step 1: Install iter8-monitoring
+      echo "Installing iter8-monitoring"
+      kustomize build monitoring/prometheus-operator | kubectl apply -f -
+      kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+      kustomize build monitoring/prometheus | kubectl apply -f - 
+
+      # Step 2: Install Iter8 controller and analytics
+      echo "Installing Iter8 controller and analytics"
+      kustomize build . | kubectl apply -f -
+      kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+      kustomize build iter8-metrics | kubectl apply -f -
+
+      # Step 3: Verify Iter8 installation
+      echo "Verifying installation"
+      kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
+      kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-monitoring
