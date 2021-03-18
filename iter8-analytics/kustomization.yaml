@@ -4,7 +4,7 @@ resources:
 
 images:
 - name: iter8/iter8-analytics
-  newTag: 2.0.0-pre
+  newTag: 2.0.0-pre.1
 
 configMapGenerator:
 - name: analytics
