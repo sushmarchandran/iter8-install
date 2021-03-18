@@ -9,6 +9,7 @@ spec:
   description: Number of requests
   type: counter
   provider: prometheus
+  jqExpression: ".data.result[0].value[1] | tonumber"
   urlTemplate: http://prometheus-operated.iter8-monitoring:9090
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -40,6 +41,7 @@ spec:
   type: gauge
   sampleSize: request-count
   provider: prometheus
+  jqExpression: ".data.result[0].value[1] | tonumber"
   urlTemplate: http://prometheus-operated.iter8-monitoring:9090
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -53,6 +55,7 @@ spec:
     value: sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[$interval])) or on() vector(0)
   type: counter
   provider: prometheus
+  jqExpression: ".data.result[0].value[1] | tonumber"
   urlTemplate: http://prometheus-operated.iter8-monitoring:9090
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -67,5 +70,6 @@ spec:
   type: gauge
   sampleSize: request-count
   provider: prometheus
+  jqExpression: ".data.result[0].value[1] | tonumber"
   urlTemplate: http://prometheus-operated.iter8-monitoring:9090
     

@@ -1,6 +1,6 @@
 namePrefix: iter8-
 resources:
-- github.com/iter8-tools/iter8-analytics/install/kubernetes/kustomize/?ref=v2.0.0-pre
+- github.com/iter8-tools/iter8-analytics/install/kubernetes/kustomize/?ref=v2.0.0-pre.1
 
 images:
 - name: iter8/iter8-analytics
