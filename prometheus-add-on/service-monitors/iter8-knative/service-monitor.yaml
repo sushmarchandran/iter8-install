@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: monitoring
+  name: ksvc-monitoring
 spec:
   namespaceSelector:
     any: true
