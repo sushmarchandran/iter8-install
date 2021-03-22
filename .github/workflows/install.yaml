@@ -59,6 +59,7 @@ jobs:
           kubectl apply -f prometheus-add-on/service-monitors/build.yaml
 
           echo "Verifying installation"
+          sleep 30.0
           kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
 
   test-install-with-kustomize:
