@@ -1,10 +1,41 @@
-name: iter8 installation
+name: Test Iter8 installation
 
 on: ["push", "pull_request"]
 
 jobs:
-  install:
-    name: install iter8
+  overwrite-kubectl-builds:
+    name: Sync kubectl/Kustomize
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    steps:
+    # Checkout the main branch and update
+    # This is taken from the example here: https://github.com/peter-evans/slash-command-dispatch-processor/blob/master/.github/workflows/hello-world-pr-command.yml
+    - uses: actions/checkout@v2
+    
+    - name: Run Kubernetes tools
+      uses: stefanprodan/kube-tools@v1
+      with:
+        kustomize: 4.0.1
+
+    # Update build.yaml files meant to be used with kubectl apply command
+    - name: update build.yaml files
+      run: |
+          kustomize build core > core/build.yaml
+          kustomize build metrics > metrics/build.yaml
+          kustomize build prometheus-add-on/prometheus > prometheus-add-on/prometheus/build.yaml
+          kustomize build prometheus-add-on/prometheus-operator > prometheus-add-on/prometheus-operator/build.yaml
+          kustomize build prometheus-add-on/service-monitors > prometheus-add-on/service-monitors/build.yaml
+
+    - name: Push changes to build.yaml if any
+      run: |
+        if [ $(git diff --exit-code > /dev/null) ]; then
+          git config --global user.name 'actions-bot'
+          git config --global user.email 'github.actions@github.com'
+          git commit -a -m "Update build.yaml files"
+        fi
+
+  test-install-with-kubectl:
+    name: install Iter8 with kubectl
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -12,18 +43,48 @@ jobs:
     
     - uses: engineerd/setup-kind@v0.5.0
 
-    - name: test iter8 installation
+    - name: test Iter8 installation
       run: |
-          echo "Installing iter8-monitoring"
-          kustomize build monitoring/prometheus-operator | kubectl apply -f -
-          kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-          kustomize build monitoring/prometheus | kubectl apply -f - 
+          echo "Installing core"
+          kubectl apply -f core/build.yaml
 
-          echo "Installing Iter8 controller and analytics"
-          kustomize build . | kubectl apply -f -
+          echo "Installing metrics"
           kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-          kustomize build iter8-metrics | kubectl apply -f -
+          kubectl apply -f metrics/build.yaml
+
+          echo "Installing prometheus-add-on"
+          kubectl apply -f prometheus-add-on/prometheus-operator/build.yaml
+          kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+          kubectl apply -f prometheus-add-on/prometheus/build.yaml
+          kubectl apply -f prometheus-add-on/service-monitors/build.yaml
 
           echo "Verifying installation"
           kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
-          kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-monitoring
+
+  test-install-with-kustomize:
+    name: install Iter8 with Kustomize
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - uses: engineerd/setup-kind@v0.5.0
+
+    - name: test Iter8 installation
+      run: |
+          echo "Installing core"
+          kustomize build core | kubectl apply -f -
+
+          echo "Installing metrics"
+          kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+          kustomize build metrics | kubectl apply -f -
+
+          echo "Installing prometheus-add-on"
+          kustomize build prometheus-add-on/prometheus-operator | kubectl apply -f -
+          kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+          kustomize build prometheus-add-on/prometheus | kubectl apply -f -
+          kustomize build prometheus-add-on/service-monitors | kubectl apply -f -
+
+          echo "Verifying installation"
+          sleep 30.0
+          kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
