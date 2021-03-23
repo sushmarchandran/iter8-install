@@ -28,13 +28,15 @@ jobs:
 
     - name: Push changes to build.yaml if any
       run: |
-        if git diff --exit-code; then
+        if git diff --exit-code > /dev/null; then
           echo "no changes detected"
         else
           echo "pushing changes..."
-          git config --global user.name 'actions-bot'
-          git config --global user.email 'github.actions@github.com'
-          git commit -a -m "Update build.yaml files"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "generated"
+          git push
           echo "pushed changes"
         fi
 
