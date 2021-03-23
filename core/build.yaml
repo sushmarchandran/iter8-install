@@ -1305,7 +1305,7 @@ data:
             # to change handler version, edit the line below
             image: iter8/handler:0.1.13-pre
             command: ["handler"]
-            args: ["run -a $(ACTION)"]
+            args: ["run", "-a", "$(ACTION)"]
             env:
             - name: ACTION
               value: start
