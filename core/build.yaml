@@ -1363,7 +1363,7 @@ spec:
         creator: iter8
     spec:
       containers:
-      - image: iter8/iter8-analytics:2.0.0-pre.1
+      - image: iter8/iter8-analytics:2.0.0-pre.2
         imagePullPolicy: Always
         name: iter8-analytics
         resources: {}
