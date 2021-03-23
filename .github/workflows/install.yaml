@@ -26,8 +26,8 @@ jobs:
           kustomize build prometheus-add-on/prometheus-operator > prometheus-add-on/prometheus-operator/build.yaml
           kustomize build prometheus-add-on/service-monitors > prometheus-add-on/service-monitors/build.yaml
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
 
   test-install-with-kubectl:
     name: install Iter8 with kubectl
