@@ -36,9 +36,16 @@ jobs:
           git config user.email github-actions@github.com
           git add .
           git commit -m "generated"
-          git push
-          echo "pushed changes"
         fi
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: generate builds
+          title: generate builds
+          body: generated kubectl build files from kustomize manifests
+
+    - run: echo "created PR"
 
   test-install-with-kubectl-on-push:
     name: install Iter8 with kubectl on push
