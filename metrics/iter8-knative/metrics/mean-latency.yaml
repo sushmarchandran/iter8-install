@@ -7,7 +7,8 @@ spec:
   units: milliseconds
   params:
   - name: query
-    value: (sum(increase(revision_app_request_latencies_sum{revision_name='$revision'}[$interval])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0))
+    value: |
+      (sum(increase(revision_app_request_latencies_sum{revision_name='$revision'}[$interval])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0))
   type: gauge
   sampleSize: request-count
   provider: prometheus

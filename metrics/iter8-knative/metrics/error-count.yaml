@@ -6,7 +6,8 @@ spec:
   description: Number of error responses
   params:
   - name: query
-    value: sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[$interval])) or on() vector(0)
+    value: |
+      sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[$interval])) or on() vector(0)
   type: counter
   provider: prometheus
   jqExpression: ".data.result[0].value[1] | tonumber"
