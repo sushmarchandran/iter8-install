@@ -3,7 +3,7 @@ kind: ServiceMonitor
 metadata:
   labels:
     creator: iter8
-  name: iter8-monitoring
+  name: iter8-ksvc-monitoring
   namespace: iter8-knative
 spec:
   endpoints:
