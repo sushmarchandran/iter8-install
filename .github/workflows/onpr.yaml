@@ -1,0 +1,32 @@
+name: Test Iter8 installation
+
+on: ["pull_request"]
+
+jobs:
+  test-install-with-kustomize:
+    name: install Iter8 with Kustomize
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - uses: engineerd/setup-kind@v0.5.0
+
+    - name: test Iter8 installation
+      run: |
+          echo "Installing core"
+          kustomize build core | kubectl apply -f -
+
+          echo "Installing metrics"
+          kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+          kustomize build metrics | kubectl apply -f -
+
+          echo "Installing prometheus-add-on"
+          kustomize build prometheus-add-on/prometheus-operator | kubectl apply -f -
+          kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+          kustomize build prometheus-add-on/prometheus | kubectl apply -f -
+          kustomize build prometheus-add-on/service-monitors | kubectl apply -f -
+
+          echo "Verifying installation"
+          sleep 30.0
+          kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system

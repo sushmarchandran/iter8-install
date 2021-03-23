@@ -1,0 +1,29 @@
+name: Test Iter8 installation
+
+on: ["push"]
+
+jobs:
+  sync-kubectl-kustomize-on-push:
+    name: Sync kubectl/Kustomize
+    runs-on: ubuntu-latest
+    steps:
+    # Checkout the main branch and update
+    # This is taken from the example here: https://github.com/peter-evans/slash-command-dispatch-processor/blob/master/.github/workflows/hello-world-pr-command.yml
+    - uses: actions/checkout@v2
+    
+    - name: Run Kubernetes tools
+      uses: stefanprodan/kube-tools@v1
+      with:
+        kustomize: 4.0.1
+
+    # Update build.yaml files meant to be used with kubectl apply command
+    - name: update build.yaml files
+      run: |
+          kustomize build core > core/build.yaml
+          kustomize build metrics > metrics/build.yaml
+          kustomize build prometheus-add-on/prometheus > prometheus-add-on/prometheus/build.yaml
+          kustomize build prometheus-add-on/prometheus-operator > prometheus-add-on/prometheus-operator/build.yaml
+          kustomize build prometheus-add-on/service-monitors > prometheus-add-on/service-monitors/build.yaml
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
