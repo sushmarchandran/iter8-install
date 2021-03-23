@@ -1,4 +1,4 @@
-name: Test Iter8 installation
+name: Test Iter8 installation with Kustomize
 
 on: ["pull_request"]
 

@@ -1,4 +1,4 @@
-name: Test Iter8 installation
+name: Create auto PR
 
 on: ["push"]
 
