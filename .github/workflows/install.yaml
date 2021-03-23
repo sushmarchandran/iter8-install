@@ -28,10 +28,14 @@ jobs:
 
     - name: Push changes to build.yaml if any
       run: |
-        if [ $(git diff --exit-code > /dev/null) ]; then
+        if git diff --exit-code; then
+          echo "no changes detected"
+        else
+          echo "pushing changes..."
           git config --global user.name 'actions-bot'
           git config --global user.email 'github.actions@github.com'
           git commit -a -m "Update build.yaml files"
+          echo "pushed changes"
         fi
 
   test-install-with-kubectl-on-push:
@@ -95,6 +99,7 @@ jobs:
   test-install-with-kubectl-on-PRs:
     name: install Iter8 with kubectl on PRs
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -123,6 +128,7 @@ jobs:
   test-install-with-kustomize-on-PRs:
     name: install Iter8 with Kustomize on PRs
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
