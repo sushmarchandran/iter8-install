@@ -26,31 +26,12 @@ jobs:
           kustomize build prometheus-add-on/prometheus-operator > prometheus-add-on/prometheus-operator/build.yaml
           kustomize build prometheus-add-on/service-monitors > prometheus-add-on/service-monitors/build.yaml
 
-    - name: Push changes to build.yaml if any
-      run: |
-        if git diff --exit-code > /dev/null; then
-          echo "no changes detected"
-        else
-          echo "pushing changes..."
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add .
-          git commit -m "generated"
-        fi
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
-        with:
-          commit-message: generate builds
-          title: generate builds
-          body: generated kubectl build files from kustomize manifests
 
-    - run: echo "created PR"
-
-  test-install-with-kubectl-on-push:
-    name: install Iter8 with kubectl on push
+  test-install-with-kubectl:
+    name: install Iter8 with kubectl
     runs-on: ubuntu-latest
-    needs: sync-kubectl-kustomize-on-push
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -76,68 +57,9 @@ jobs:
           sleep 30.0
           kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
 
-  test-install-with-kustomize-on-push:
-    name: install Iter8 with Kustomize on push
+  test-install-with-kustomize:
+    name: install Iter8 with Kustomize
     runs-on: ubuntu-latest
-    needs: sync-kubectl-kustomize-on-push
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    
-    - uses: engineerd/setup-kind@v0.5.0
-
-    - name: test Iter8 installation
-      run: |
-          echo "Installing core"
-          kustomize build core | kubectl apply -f -
-
-          echo "Installing metrics"
-          kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-          kustomize build metrics | kubectl apply -f -
-
-          echo "Installing prometheus-add-on"
-          kustomize build prometheus-add-on/prometheus-operator | kubectl apply -f -
-          kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-          kustomize build prometheus-add-on/prometheus | kubectl apply -f -
-          kustomize build prometheus-add-on/service-monitors | kubectl apply -f -
-
-          echo "Verifying installation"
-          sleep 30.0
-          kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
-
-  test-install-with-kubectl-on-PRs:
-    name: install Iter8 with kubectl on PRs
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'pull_request' }}
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    
-    - uses: engineerd/setup-kind@v0.5.0
-
-    - name: test Iter8 installation
-      run: |
-          echo "Installing core"
-          kubectl apply -f core/build.yaml
-
-          echo "Installing metrics"
-          kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-          kubectl apply -f metrics/build.yaml
-
-          echo "Installing prometheus-add-on"
-          kubectl apply -f prometheus-add-on/prometheus-operator/build.yaml
-          kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-          kubectl apply -f prometheus-add-on/prometheus/build.yaml
-          kubectl apply -f prometheus-add-on/service-monitors/build.yaml
-
-          echo "Verifying installation"
-          sleep 30.0
-          kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
-
-  test-install-with-kustomize-on-PRs:
-    name: install Iter8 with Kustomize on PRs
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'pull_request' }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
