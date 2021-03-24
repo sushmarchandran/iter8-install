@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    creator: iter8
+  name: iter8-ksvc-monitoring
+  namespace: iter8-knative
+spec:
+  endpoints:
+  - interval: 10s
+    port: http-usermetric
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      networking.internal.knative.dev/serviceType: Private

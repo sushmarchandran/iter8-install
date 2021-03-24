@@ -1,0 +1,4 @@
+namespace: iter8-knative
+
+resources:
+- service-monitor.yaml
