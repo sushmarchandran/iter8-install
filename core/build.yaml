@@ -142,10 +142,10 @@ spec:
                       - preferredDirection
                       type: object
                     type: array
-                  support:
-                    description: Support identifies the required degree of support
-                      the analytics must provide before the analytics engine will
-                      assert success for an objective.
+                  strength:
+                    description: Strength identifies the required degree of support
+                      the analytics must provide before it will assert success for
+                      an objective.
                     x-kubernetes-preserve-unknown-fields: true
                 type: object
               duration:
@@ -980,9 +980,9 @@ metadata:
   namespace: iter8-system
 rules:
 - apiGroups:
-  - ""
+  - coordination.k8s.io
   resources:
-  - configmaps
+  - leases
   verbs:
   - get
   - list
@@ -991,14 +991,6 @@ rules:
   - update
   - patch
   - delete
-- apiGroups:
-  - ""
-  resources:
-  - configmaps/status
-  verbs:
-  - get
-  - update
-  - patch
 - apiGroups:
   - ""
   resources:
